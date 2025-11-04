@@ -1,179 +1,1340 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orders for Delivery</title>
+    <title>Plan de Modernización | Admin → Pinit</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-core.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-gantt.min.js"></script>
+    <style>
+        body {
+            font-family: 'Rubik', sans-serif;
+        }
+        h2 {
+            color: #602166;
+        }
+        .accent {
+            color: #602166;
+        }
+        .accent-bg {
+            background-color: #602166;
+        }
+        .section-divider {
+            border-top: 1px solid #e5e7eb;
+            margin: 2rem 0;
+        }
+        .gear-outline {
+            -webkit-text-stroke: 1.5px #d1d5db;
+            -webkit-text-fill-color: transparent;
+            color: #d1d5db;
+        }
+        .etapa-badge {
+            background-color: #05b86b;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ai-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #05b86b;
+            font-weight: 600;
+            color: white;
+            margin: 0 6px;
+            font-size: 0.85rem;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 12px rgba(5, 184, 107, 0.45);
+            overflow: visible;
+        }
+        .ai-wave {
+            position: absolute;
+            inset: 1px;
+            border-radius: 50%;
+            background-color: rgba(5, 184, 107, 0.5);
+            z-index: -1;
+            animation: aiWave var(--ai-wave-duration, 1800ms) ease-out forwards;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+        @keyframes aiWave {
+            0% {
+                transform: scale(0.3);
+                opacity: 1;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            100% {
+                transform: scale(2.2);
+                opacity: 0;
+            }
+        }
+        .priority-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #602166;
+            color: white;
+            box-shadow: 0 0 12px rgba(96, 33, 102, 0.45);
+        }
+        .priority-pill i {
+            animation: rotateGear 8s linear infinite;
+        }
+        @keyframes rotateGear {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .loading-spinner {
+            border: 2px solid #f3f4f6;
+            border-top: 2px solid #602166;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .loading-spinner.white {
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-top: 2.5px solid #ffffff;
+            width: 18px;
+            height: 18px;
+        }
+        .loading-spinner.green {
+            border: 2.5px solid rgba(5, 184, 107, 0.2);
+            border-top: 2.5px solid #05b86b;
+            width: 18px;
+            height: 18px;
+        }
+        .loading-spinner.purple {
+            border: 2.5px solid rgba(96, 33, 102, 0.2);
+            border-top: 2.5px solid #602166;
+            width: 18px;
+            height: 18px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-white text-gray-900">
+
     <!-- Header -->
-    <header class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                    JD
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-900">John Doe</p>
-                    <p class="text-xs text-gray-500">john.doe@email.com</p>
-                </div>
-            </div>
-            <div class="cursor-pointer">
-                <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    <header class="bg-white pt-12 pb-4">
+        <div class="max-w-[1000px] mx-auto px-8">
+            <h1 class="text-5xl font-light mb-2 flex items-center gap-4">
+                <span class="text-gray-300">Admin</span>
+                <i class="fas fa-arrow-right text-3xl" style="color: #05b86b; font-weight: 700;"></i>
+                <svg class="h-16 w-auto" id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 172.5 68.3">
+                  <defs>
+                    <style>
+                      .st0 {
+                        fill: #602166;
+                      }
+                    </style>
+                  </defs>
+                  <path class="st0" d="M25.9,29.8c-1.2-2.1-2.8-3.8-4.9-5-.6-.3-1.2-.6-1.8-.9-1.6-.6-3.4-.9-5.3-.9s-3.5.3-5,.8c0,0,0,0-.1,0-.8.3-1.6.6-2.3,1-2,1.2-3.6,2.8-4.7,4.9-.5,1-.9,2-1.2,3.1,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,0,0,.1,0,0,0,.2,0,.2,0,0,0,.2,0,.2-.2.9-.3,1.9-.3,2.9,0,0,0,.2,0,.3,0,2.7.6,5.1,1.7,7.2,1.2,2.1,2.8,3.8,4.9,5,.6.3,1.2.6,1.8.9,1.6.6,3.4.9,5.3.9s3.5-.3,5-.8c0,0,0,0,0,0,.8-.3,1.5-.6,2.2-1,2.1-1.2,3.7-2.8,4.9-5,.5-1,1-2.1,1.3-3.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0,0,0-.1,0,0,0-.2,0-.2.2-.9.3-1.8.3-2.7,0-.1,0-.3,0-.4,0,0,0-.1,0-.2h0c0-2.8-.6-5.2-1.8-7.3ZM16.4,42.8c0,0-.2.1-.3.1h-2.1c-.2,0-.3,0-.4-.1,0,0-.1-.2-.2-.2l-.7-1.7h-4.5l-.6,1.7c0,0,0,.1-.1.2,0,0-.2.1-.4.1h-2.1c0,0-.2,0-.2-.1s-.1-.2-.1-.2,0-.1,0-.1l3.9-10.7c0-.1.1-.2.2-.3.1,0,.3-.1.4-.1h2.5c.2,0,.3,0,.4.1.1,0,.2.2.2.3l3.9,10.7s0,0,0,.1c0,0,0,.2-.1.2ZM20.9,42.5c0,.1,0,.2-.1.3,0,0-.2.1-.3.1h-2.2c-.1,0-.2,0-.3-.1,0,0-.1-.2-.1-.3v-10.8c0-.1,0-.2.1-.3s.2-.1.3-.1h2.2c.1,0,.2,0,.3.1,0,0,.1.2.1.3v10.8ZM9.2,38.5h3.1l-1.6-4.4-1.6,4.4Z"/>
+                  <g>
+                    <g>
+                      <g>
+                        <g>
+                          <path class="st0" d="M89.8,2.1c-1.4-1.4-3.2-2.1-5.2-2.1s-3.8.7-5.2,2.1c-1.4,1.4-2.1,3.1-2.1,5.2s.7,3.8,2.1,5.2c1.4,1.4,3.1,2.1,5.2,2.1s3.8-.7,5.2-2.1c1.4-1.4,2.2-3.1,2.2-5.2s-.7-3.8-2.2-5.2Z"/>
+                          <path class="st0" d="M172.5,21.8v-11.4h-6.6V2.5h-12.1v33.1c0,6.2,1.6,10.8,4.9,13.9,3.2,3.1,7.8,4.6,13.7,4.6v-12.4c-2.4,0-4.1-.4-5.1-1.3-1-.9-1.4-2.4-1.4-4.5v-14.1h6.6Z"/>
+                        </g>
+                        <path class="st0" d="M71.5,25.2c-1.7-3-4-5.4-7-7-3-1.7-6.4-2.5-10.2-2.5s-7.2.8-10.2,2.5c-3,1.7-5.3,4-7,7-1.7,3-2.5,6.4-2.5,10.2v31.5h12.1v-14.2c2.1,1.7,4.9,2.5,8.3,2.5s6.9-.8,9.8-2.5c2.8-1.7,5.1-4,6.7-7,1.6-3,2.4-6.4,2.4-10.2s-.8-7.2-2.5-10.2ZM59.6,41.2c-1.3,1.5-3.1,2.2-5.2,2.2s-3.8-.7-5.2-2.2c-1.4-1.5-2-3.4-2-5.8s.7-4.3,2-5.8c1.4-1.5,3.1-2.3,5.2-2.3s3.9.8,5.2,2.3c1.3,1.5,2,3.4,2,5.8s-.7,4.3-2,5.8Z"/>
+                        <path class="st0" d="M147.3,45.5v-23.7h-12.1v23.7h0v7s-.1.8-.2,1.2c-.5,1.2-1.7,2.1-3.1,2.1s-2.3-.6-2.8-1.6c-.4-.5-.5-1.7-.5-1.7v-7h0v-15.1c0-4.5-1.3-8.1-3.9-10.7-2.6-2.6-6.2-4-10.6-4s-2.3,0-3.3.2c-.9.1-2.1.4-3.5.7-.9.2-1.7.4-2.6.5-.9.1-1.7.2-2.5.2-1.5,0-3-.2-4.5-.6v37.5h12.1v-26.2c1.2-.7,2.3-1,3.5-1s1.8.3,2.4.9c.6.6.9,1.4.9,2.4v23.3h0c.3,8.2,7,14.7,15.3,14.7s9-2.2,11.8-5.5c2.4-2.4,3.5-5.6,3.7-9.1h0v-.5c0,0,0-.2,0-.2v-7.4h0Z"/>
+                      </g>
+                      <path class="st0" d="M146.5,2.1c-1.5-1.4-3.2-2.1-5.2-2.1s-3.8.7-5.2,2.1c-1.4,1.4-2.1,3.1-2.1,5.2,0,5.4,7.3,12,7.3,12,0,0,7.4-6.8,7.4-12s-.7-3.8-2.2-5.2ZM143.6,9.7c-.7.6-1.5,1-2.4,1s-1.7-.3-2.3-1c-.6-.7-1-1.4-1-2.3s.3-1.7,1-2.3c.6-.7,1.4-1,2.3-1s1.7.3,2.4,1,1,1.4,1,2.3-.3,1.7-1,2.3Z"/>
+                    </g>
+                    <g>
+                      <g>
+                        <g>
+                          <path class="st0" d="M89.8,2.1c-1.4-1.4-3.2-2.1-5.2-2.1s-3.8.7-5.2,2.1c-1.4,1.4-2.1,3.1-2.1,5.2s.7,3.8,2.1,5.2c1.4,1.4,3.1,2.1,5.2,2.1s3.8-.7,5.2-2.1c1.4-1.4,2.2-3.1,2.2-5.2s-.7-3.8-2.2-5.2Z"/>
+                          <rect class="st0" x="78.5" y="16.7" width="12.1" height="37.5"/>
+                        </g>
+                        <path class="st0" d="M172.5,21.8v-11.4h-6.6V2.5h-12.1v33.1c0,6.2,1.6,10.8,4.9,13.9,3.2,3.1,7.8,4.6,13.7,4.6v-12.4c-2.4,0-4.1-.4-5.1-1.3-1-.9-1.4-2.4-1.4-4.5v-14.1h6.6Z"/>
+                      </g>
+                      <path class="st0" d="M147.3,45.5v-23.7h-12.1v23.7h0v7s-.1.8-.2,1.2c-.5,1.2-1.7,2.1-3.1,2.1s-2.3-.6-2.8-1.6c-.4-.5-.5-1.7-.5-1.7v-7h0v-15.1c0-4.5-1.3-8.1-3.9-10.7-2.6-2.6-6.2-4-10.6-4s-2.3,0-3.3.2c-.9.1-2.1.4-3.5.7-.9.2-1.7.4-2.6.5-.9.1-1.7.2-2.5.2-1.5,0-3-.2-4.5-.6v37.5h12.1v-26.2c1.2-.7,2.3-1,3.5-1s1.8.3,2.4.9c.6.6.9,1.4.9,2.4v23.3h0c.3,8.2,7,14.7,15.3,14.7s9-2.2,11.8-5.5c2.4-2.4,3.5-5.6,3.7-9.1h0v-.5c0,0,0-.2,0-.2v-7.4h0Z"/>
+                    </g>
+                    <path class="st0" d="M146.5,2.1c-1.5-1.4-3.2-2.1-5.2-2.1s-3.8.7-5.2,2.1c-1.4,1.4-2.1,3.1-2.1,5.2,0,5.4,7.3,12,7.3,12,0,0,7.4-6.8,7.4-12s-.7-3.8-2.2-5.2ZM143.6,9.7c-.7.6-1.5,1-2.4,1s-1.7-.3-2.3-1c-.6-.7-1-1.4-1-2.3s.3-1.7,1-2.3c.6-.7,1.4-1,2.3-1s1.7.3,2.4,1,1,1.4,1,2.3-.3,1.7-1,2.3Z"/>
+                  </g>
                 </svg>
-            </div>
+            </h1>
+            <div class="text-lg font-light text-gray-500 uppercase tracking-wide mb-3">PLAN DE MODERNIZACIÓN FRONTEND</div>
+            <p class="text-xl font-light text-gray-600 max-w-2xl">
+                Transformación gradual de un sistema legacy hacia una plataforma moderna, escalable y centrada en el usuario.
+            </p>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-6">Orders for Delivery</h1>
-        
-        <!-- Filters -->
-        <div class="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap gap-4">
-            <div class="flex-1 min-w-[200px]">
-                <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Status:</label>
-                <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="all">All</option>
-                    <option value="pending">Pending</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="fail">Fail</option>
-                </select>
-            </div>
-            <div class="flex-1 min-w-[200px]">
-                <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-2">Sort by:</label>
-                <select id="sortBy" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Select...</option>
-                    <option value="delivery">Delivery Date (Newest First)</option>
-                    <option value="created">Created Date (Newest First)</option>
-                </select>
-            </div>
-        </div>
+    <main class="max-w-[1000px] mx-auto px-8 py-10">
 
-        <!-- Table -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking Number</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivery Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
-                        <!-- Data will be inserted here by JavaScript -->
-                    </tbody>
-                </table>
+        <!-- Context -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-light mb-4"><i class="fas fa-crosshairs text-lg mr-2 text-gray-400"></i>El Desafío</h2>
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-100 p-5 rounded">
+                    <h3 class="font-medium mb-2 text-lg uppercase tracking-wide text-[#602166]">Sistema Actual</h3>
+                    <p class="text-lg font-light">Admin</p>
+                    <p class="text-base text-gray-600 mt-2">React 16 | 30% responsive | UI fragmentada</p>
+                    <p class="text-base text-gray-600 mt-1">Sin medición de errores</p>
+                    <p class="text-base text-gray-600 mt-1">Sin automatizaciones</p>
+                </div>
+                <div class="bg-gray-50 p-5 rounded">
+                    <h3 class="font-medium mb-2 text-lg uppercase tracking-wide text-[#602166]">Visión</h3>
+                    <p class="text-lg font-light">Pinit</p>
+                    <p class="text-base text-gray-600 mt-2">React 18 | 100% responsive | Identidad unificada</p>
+                    <p class="text-base text-gray-600 mt-1">Errores medibles en tiempo real</p>
+                    <p class="text-base text-gray-600 mt-1">Agentes <span class="ai-pill">AI</span> que resuelven bugs</p>
+                </div>
             </div>
-        </div>
+            <p class="text-lg text-gray-700 leading-relaxed">
+                La migración no es solo técnica. Es una evolución que preserva la funcionalidad crítica mientras introduce
+                una experiencia moderna. <span class="accent font-medium">La clave está en la gradualidad</span>: primero la interfaz,
+                luego el motor.
+            </p>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Modules Priority -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-light mb-4"><i class="fas fa-users text-lg mr-2 text-gray-400"></i>Priorización</h2>
+            <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                Cinco módulos concentran el mayor uso diario. La transformación comienza aquí.
+            </p>
+            <div class="grid grid-cols-5 gap-4">
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center mb-2">
+                        <div class="priority-pill mb-2">
+                            <i class="fas fa-gear text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-400">01</span>
+                    </div>
+                    <p class="text-base font-medium">Órdenes</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center mb-2 relative">
+                        <div class="absolute top-2 right-2 w-[5px] h-[5px] rounded-full bg-[#05b86b]"></div>
+                        <div class="priority-pill mb-2">
+                            <i class="fas fa-gear text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-400">02</span>
+                    </div>
+                    <p class="text-base font-medium">Tracking</p>
+                    <p class="text-sm font-light text-gray-400 mt-1">Tracking Live</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center mb-2">
+                        <div class="priority-pill mb-2">
+                            <i class="fas fa-gear text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-400">03</span>
+                    </div>
+                    <p class="text-base font-medium">Almacenes</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center mb-2">
+                        <div class="priority-pill mb-2">
+                            <i class="fas fa-gear text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-400">04</span>
+                    </div>
+                    <p class="text-base font-medium">Primer Movimiento</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center mb-2">
+                        <div class="priority-pill mb-2">
+                            <i class="fas fa-gear text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-400">05</span>
+                    </div>
+                    <p class="text-base font-medium">Contenedores</p>
+                </div>
+            </div>
+
+            <!-- Secondary Modules - First Row -->
+            <div class="grid grid-cols-8 gap-3 mt-8">
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5 relative">
+                        <div class="absolute top-2 right-2 w-[5px] h-[5px] rounded-full bg-[#05b86b]"></div>
+                        <span class="text-lg font-light text-gray-300">06</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Routing/Sorter</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">07</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Recolecciones</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">08</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Solicitud de Recolecciones</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">09</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Asignaciones Última Milla</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">10</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Service Partner</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">11</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Circuitos</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">12</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Aceptación Sorter</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">13</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Edición Órdenes</p>
+                </div>
+            </div>
+
+            <!-- Secondary Modules - Second Row -->
+            <div class="grid grid-cols-9 gap-3 mt-3">
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">14</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Aduanas</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">15</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Asignaciones</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">16</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Dashboard</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">17</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Atención al Cliente</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">18</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Tiendas</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">19</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Clientes</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">20</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Transportistas</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">21</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Control Asistencia</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-1.5">
+                        <span class="text-lg font-light text-gray-300">22</span>
+                    </div>
+                    <p class="text-sm font-normal text-gray-600">Ajustes</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Phase 1 -->
+        <section class="mb-12">
+            <div class="flex items-baseline mb-4">
+                <span class="etapa-badge text-base font-medium uppercase tracking-wide mr-4">
+                    Etapa 01
+                </span>
+                <h2 class="text-3xl font-light">Modernización hacia Pinit Layout</h2>
+            </div>
+            <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                La primera impresión define la experiencia. Migrar la interfaz completa hacia la identidad visual de Pinit
+                establece las bases para todo lo que sigue.
+            </p>
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <h3 class="font-medium mb-3 text-lg uppercase tracking-wide text-[#602166]">Alcance</h3>
+                <ul class="space-y-2 text-lg text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span>Branding completo de Pinit</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span>Nuevos componentes con mejor UX</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span>100% responsive</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span>Nuevos assets gráficos, iconografía, colores y concepto visual</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span>Monitoreo en tiempo real de bugs con Sentry</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span>Despliegue multisitio dinámico</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Phase 2 -->
+        <section class="mb-12">
+            <div class="flex items-baseline mb-4">
+                <span class="etapa-badge text-base font-medium uppercase tracking-wide mr-4">
+                    Etapa 02
+                </span>
+                <h2 class="text-3xl font-light">Actualización del Motor</h2>
+            </div>
+            <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                Con la interfaz estabilizada, el sistema puede evolucionar técnicamente sin comprometer la operación.
+                <span class="accent font-medium">Gradual. Controlado. Medible.</span>
+            </p>
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <h3 class="font-medium mb-3 text-lg uppercase tracking-wide text-[#602166]">Alcance</h3>
+                <ul class="space-y-2 text-lg text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span>Actualización del motor de JavaScript de forma gradual, minimizando riesgos</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span>Programación de actualizaciones cada 6 meses, manteniéndose al día con la evolución de la industria frontend</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span>Testing E2E automatizado por módulos, reduciendo significativamente el tiempo de pruebas manuales</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Phase 3 -->
+        <section class="mb-12">
+            <div class="flex items-baseline mb-4">
+                <span class="etapa-badge text-base font-medium uppercase tracking-wide mr-4">
+                    Etapa 03
+                </span>
+                <h2 class="text-3xl font-light">Design System</h2>
+            </div>
+            <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                La consistencia a escala requiere sistemas, no solo componentes. Una librería nativa que establece las bases
+                para mantener la identidad del producto alineada, fomentar mejores prácticas en cada implementación, y
+                garantizar que futuras evoluciones tecnológicas sean migraciones naturales, no reinvenciones forzadas.
+            </p>
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <h3 class="font-medium mb-3 text-lg uppercase tracking-wide text-[#602166]">UI System</h3>
+                <p class="text-gray-600 mb-3" style="font-size: 16px;">
+                    Componentes que se instalan de inmediato
+                    <span class="inline-block bg-white text-gray-700 px-3 py-1 rounded text-sm font-mono ml-2 border border-gray-300">npm i @pinit/table</span>
+                </p>
+                <div class="grid grid-cols-2 gap-3 text-gray-700" style="font-size: 18px; font-weight: 100;">
+                    <div>
+                        <p class="font-medium text-lg mb-1">@pinit/input</p>
+                        <p style="font-size: 16px;" class="text-gray-500">Campos de entrada estandarizados</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-lg mb-1">@pinit/form</p>
+                        <p style="font-size: 16px;" class="text-gray-500">Formularios con validación integrada</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-lg mb-1">@pinit/table</p>
+                        <p style="font-size: 16px;" class="text-gray-500">Grids con ordenamiento y filtros</p>
+                    </div>
+                    <div>
+                        <p class="font-medium text-lg mb-1">@pinit/modal</p>
+                        <p style="font-size: 16px;" class="text-gray-500">Overlays consistentes</p>
+                    </div>
+                </div>
+
+                <h3 class="font-medium mb-3 mt-6 text-lg uppercase tracking-wide text-[#602166]">Ventajas</h3>
+                <div class="grid grid-cols-2 gap-x-8 gap-y-2">
+                    <div class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span class="text-lg text-gray-700">Unificación de identidad visual en todo el producto</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span class="text-lg text-gray-700">Obliga a encapsular lógica que no se puede corromper</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span class="text-lg text-gray-700">Versionamiento de migraciones por componentes</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span class="text-lg text-gray-700">Eliminación progresiva de código duplicado</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span class="text-lg text-gray-700">Onboarding acelerado para nuevos desarrolladores</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check text-sm text-gray-400 mt-1.5 mr-3"></i>
+                        <span class="text-lg text-gray-700">Reducción de bugs por diseño consistente</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Innovation -->
+        <section class="mb-12">
+            <div class="flex items-baseline mb-4">
+                <span class="etapa-badge text-base font-medium uppercase tracking-wide mr-4">
+                    Etapa 04
+                </span>
+                <h2 class="text-3xl font-light">Propuestas de Innovación <span class="text-gray-400">(interface-less)</span></h2>
+            </div>
+            <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                La modernización es una oportunidad para redefinir cómo los usuarios interactúan con el sistema.
+                <span class="accent font-medium">La <span class="ai-pill">AI</span> no reemplaza, potencia el producto, con zero UI. Menos interfaz, más inteligencia.</span>
+            </p>
+            <div class="space-y-4">
+                <div class="border-l-2 border-gray-200 pl-5">
+                    <h3 class="font-medium mb-1.5 accent text-xl"><i class="fas fa-bolt mr-2 text-[#05b86b]"></i>Atención Inmediata de Bugs</h3>
+                    <p style="font-size: 18px; font-weight: 100;" class="text-gray-600">
+                        Agentes de <span class="ai-pill">AI</span> que detectan, diagnostican y proponen soluciones en tiempo real, para resolver bugs del sistema, <a href="https://chrisifm.github.io/ia-proof/" target="_blank" rel="noopener noreferrer" class="text-[#05b86b] hover:text-[#049a5d] underline font-normal">ver ejemplo</a>.
+                    </p>
+                </div>
+                <div class="border-l-2 border-gray-200 pl-5">
+                    <h3 class="font-medium mb-1.5 accent text-xl"><i class="fas fa-bolt mr-2 text-[#05b86b]"></i>Filtros con Lenguaje Natural</h3>
+                    <p style="font-size: 18px; font-weight: 100;" class="text-gray-600">
+                        Sin clicks, sin filtros complejos. Escribe lo que necesitas en lenguaje natural y el sistema responde al instante.
+                    </p>
+                    <div id="query-results" class="mt-4 mb-4 hidden"></div>
+                    <div class="mt-4 relative">
+                        <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 flex items-center gap-3">
+                            <span id="query-input" style="font-size: 16px; font-weight: 300;" class="text-gray-600 flex-1 cursor-pointer">
+                                Dame órdenes entregadas de ayer antes de las 2 pm
+                            </span>
+                            <button id="send-query-btn" class="w-8 h-8 rounded-full bg-[#05b86b] flex items-center justify-center flex-shrink-0 hover:bg-[#049a5d] transition-colors cursor-pointer">
+                                <i class="fas fa-arrow-up text-white text-sm"></i>
+                            </button>
+                        </div>
+                        <div id="autocomplete-suggestions" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-2 z-10">
+                            <div class="autocomplete-option px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded cursor-pointer transition-colors">
+                                Solo quiero las de walmart
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-l-2 border-gray-200 pl-5">
+                    <h3 class="font-medium mb-1.5 accent text-xl"><i class="fas fa-bolt mr-2 text-[#05b86b]"></i>Chatbot de Asistencia</h3>
+                    <p style="font-size: 18px; font-weight: 100;" class="text-gray-600">
+                        Guía contextual que valida permisos y sugiere acciones.
+                    </p>
+                    <div id="chatbot-results" class="mt-4 mb-4 hidden"></div>
+                    <div class="mt-4 relative">
+                        <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 flex items-center gap-3">
+                            <span id="chatbot-input" style="font-size: 16px; font-weight: 300;" class="text-gray-600 flex-1">
+                                ¿Por qué no puedo eliminar una orden?
+                            </span>
+                            <button id="send-chatbot-btn" class="w-8 h-8 rounded-full bg-[#05b86b] flex items-center justify-center flex-shrink-0 hover:bg-[#049a5d] transition-colors cursor-pointer">
+                                <i class="fas fa-arrow-up text-white text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-l-2 border-gray-200 pl-5">
+                    <h3 class="font-medium mb-1.5 accent text-xl"><i class="fas fa-bolt mr-2 text-[#05b86b]"></i>Módulos Autodocumentados</h3>
+                    <p style="font-size: 18px; font-weight: 100;" class="text-gray-600">
+                        Documentación generada dinámicamente que se adapta al contexto del usuario.
+                    </p>
+                    <div id="docs-results" class="mt-4 mb-4 hidden"></div>
+                    <div class="mt-4 relative">
+                        <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 flex items-center gap-3">
+                            <span id="docs-input" style="font-size: 16px; font-weight: 300;" class="text-gray-600 flex-1">
+                                ¿Cómo rastreo una orden en esta página?
+                            </span>
+                            <button id="send-docs-btn" class="w-8 h-8 rounded-full bg-[#05b86b] flex items-center justify-center flex-shrink-0 hover:bg-[#049a5d] transition-colors cursor-pointer">
+                                <i class="fas fa-arrow-up text-white text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Timeline -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-light mb-4"><i class="fas fa-calendar-alt text-lg mr-2 text-gray-400"></i>Timeline de Migración</h2>
+            <p class="text-gray-700 leading-relaxed mb-6" style="font-size: 18px; font-weight: 100;">
+                Los primeros módulos migrados marcan el ritmo. Routing, Tracking y Tracking Live establecen el precedente.
+            </p>
+            <div id="gantt-chart" style="width: 100%; height: 500px;"></div>
+        </section>
+
     </main>
 
+    <!-- Footer -->
+    <footer class="bg-gray-50 py-8 mt-12">
+        <div class="max-w-[1000px] mx-auto px-8 text-center">
+            <p class="text-sm text-gray-500">
+                Plan de Modernización Admin Pinit
+            </p>
+        </div>
+    </footer>
+
     <script>
-        // Generate 50 dummy records
-        const orders = [
-            {tracking: "TRK001234567", address: "123 Main St, New York, NY", name: "Alice Johnson", created: "2025-10-01", delivery: "2025-11-05", status: "fail"},
-            {tracking: "TRK002345678", address: "456 Oak Ave, Los Angeles, CA", name: "Bob Smith", created: "2025-10-02", delivery: "2025-11-06", status: "delivered"},
-            {tracking: "TRK003456789", address: "789 Pine Rd, Chicago, IL", name: "Carol Williams", created: "2025-10-03", delivery: "2025-11-04", status: "pending"},
-            {tracking: "TRK004567890", address: "321 Elm St, Houston, TX", name: "David Brown", created: "2025-10-04", delivery: "2025-11-07", status: "fail"},
-            {tracking: "TRK005678901", address: "654 Maple Dr, Phoenix, AZ", name: "Emma Davis", created: "2025-10-05", delivery: "2025-11-08", status: "pending"},
-            {tracking: "TRK006789012", address: "987 Cedar Ln, Philadelphia, PA", name: "Frank Miller", created: "2025-10-06", delivery: "2025-11-03", status: "delivered"},
-            {tracking: "TRK007890123", address: "147 Birch Ct, San Antonio, TX", name: "Grace Wilson", created: "2025-10-07", delivery: "2025-11-09", status: "fail"},
-            {tracking: "TRK008901234", address: "258 Walnut Blvd, San Diego, CA", name: "Henry Moore", created: "2025-10-08", delivery: "2025-11-10", status: "delivered"},
-            {tracking: "TRK009012345", address: "369 Cherry St, Dallas, TX", name: "Iris Taylor", created: "2025-10-09", delivery: "2025-11-05", status: "pending"},
-            {tracking: "TRK010123456", address: "741 Spruce Ave, San Jose, CA", name: "Jack Anderson", created: "2025-10-10", delivery: "2025-11-11", status: "delivered"},
-            {tracking: "TRK011234567", address: "852 Ash Rd, Austin, TX", name: "Karen Thomas", created: "2025-10-11", delivery: "2025-11-06", status: "pending"},
-            {tracking: "TRK012345678", address: "963 Poplar Dr, Jacksonville, FL", name: "Leo Jackson", created: "2025-10-12", delivery: "2025-11-12", status: "delivered"},
-            {tracking: "TRK013456789", address: "159 Hickory Ln, Fort Worth, TX", name: "Maria White", created: "2025-10-13", delivery: "2025-11-07", status: "pending"},
-            {tracking: "TRK014567890", address: "357 Willow St, Columbus, OH", name: "Nathan Harris", created: "2025-10-14", delivery: "2025-11-13", status: "delivered"},
-            {tracking: "TRK015678901", address: "486 Sycamore Ave, San Francisco, CA", name: "Olivia Martin", created: "2025-10-15", delivery: "2025-11-08", status: "pending"},
-            {tracking: "TRK016789012", address: "792 Magnolia Blvd, Charlotte, NC", name: "Peter Thompson", created: "2025-10-16", delivery: "2025-11-14", status: "delivered"},
-            {tracking: "TRK017890123", address: "135 Cypress Ct, Indianapolis, IN", name: "Quinn Garcia", created: "2025-10-17", delivery: "2025-11-09", status: "pending"},
-            {tracking: "TRK018901234", address: "246 Redwood Dr, Seattle, WA", name: "Rachel Martinez", created: "2025-10-18", delivery: "2025-11-15", status: "delivered"},
-            {tracking: "TRK019012345", address: "531 Fir Rd, Denver, CO", name: "Samuel Robinson", created: "2025-10-19", delivery: "2025-11-10", status: "pending"},
-            {tracking: "TRK020123456", address: "864 Palm St, Washington, DC", name: "Tina Clark", created: "2025-10-20", delivery: "2025-11-16", status: "fail"},
-            {tracking: "TRK021234567", address: "975 Beech Ave, Boston, MA", name: "Ulysses Rodriguez", created: "2025-10-21", delivery: "2025-11-11", status: "pending"},
-            {tracking: "TRK022345678", address: "108 Alder Ln, El Paso, TX", name: "Victoria Lewis", created: "2025-10-22", delivery: "2025-11-17", status: "fail"},
-            {tracking: "TRK023456789", address: "219 Hazel Dr, Nashville, TN", name: "William Lee", created: "2025-10-23", delivery: "2025-11-12", status: "pending"},
-            {tracking: "TRK024567890", address: "420 Juniper Blvd, Detroit, MI", name: "Xena Walker", created: "2025-10-24", delivery: "2025-11-18", status: "delivered"},
-            {tracking: "TRK025678901", address: "531 Dogwood Ct, Oklahoma City, OK", name: "Yuri Hall", created: "2025-10-25", delivery: "2025-11-13", status: "fail"},
-            {tracking: "TRK026789012", address: "642 Laurel St, Portland, OR", name: "Zoe Allen", created: "2025-10-26", delivery: "2025-11-19", status: "delivered"},
-            {tracking: "TRK027890123", address: "753 Chestnut Ave, Las Vegas, NV", name: "Aaron Young", created: "2025-10-27", delivery: "2025-11-14", status: "pending"},
-            {tracking: "TRK028901234", address: "864 Pecan Rd, Louisville, KY", name: "Bella Hernandez", created: "2025-10-28", delivery: "2025-11-20", status: "delivered"},
-            {tracking: "TRK029012345", address: "975 Acacia Dr, Baltimore, MD", name: "Charlie King", created: "2025-10-29", delivery: "2025-11-15", status: "pending"},
-            {tracking: "TRK030123456", address: "186 Cottonwood Ln, Milwaukee, WI", name: "Diana Wright", created: "2025-10-30", delivery: "2025-11-21", status: "delivered"},
-            {tracking: "TRK031234567", address: "297 Mesquite Blvd, Albuquerque, NM", name: "Ethan Lopez", created: "2025-10-31", delivery: "2025-11-16", status: "pending"},
-            {tracking: "TRK032345678", address: "408 Sassafras Ct, Tucson, AZ", name: "Fiona Hill", created: "2025-11-01", delivery: "2025-11-22", status: "delivered"},
-            {tracking: "TRK033456789", address: "519 Buckeye St, Fresno, CA", name: "George Scott", created: "2025-11-02", delivery: "2025-11-17", status: "pending"},
-            {tracking: "TRK034567890", address: "630 Buttonwood Ave, Sacramento, CA", name: "Hannah Green", created: "2025-11-03", delivery: "2025-11-23", status: "delivered"},
-            {tracking: "TRK035678901", address: "741 Catalpa Rd, Long Beach, CA", name: "Isaac Adams", created: "2025-11-04", delivery: "2025-11-18", status: "pending"},
-            {tracking: "TRK036789012", address: "852 Elderberry Dr, Kansas City, MO", name: "Julia Baker", created: "2025-09-15", delivery: "2025-11-24", status: "delivered"},
-            {tracking: "TRK037890123", address: "963 Ginkgo Ln, Mesa, AZ", name: "Kevin Nelson", created: "2025-09-16", delivery: "2025-11-19", status: "pending"},
-            {tracking: "TRK038901234", address: "174 Hawthorne Blvd, Atlanta, GA", name: "Laura Carter", created: "2025-09-17", delivery: "2025-11-25", status: "fail"},
-            {tracking: "TRK039012345", address: "285 Ironwood Ct, Colorado Springs, CO", name: "Marcus Mitchell", created: "2025-09-18", delivery: "2025-11-20", status: "pending"},
-            {tracking: "TRK040123456", address: "396 Katsura St, Raleigh, NC", name: "Nina Perez", created: "2025-09-19", delivery: "2025-11-26", status: "fail"},
-            {tracking: "TRK041234567", address: "507 Linden Ave, Omaha, NE", name: "Oscar Roberts", created: "2025-09-20", delivery: "2025-11-21", status: "pending"},
-            {tracking: "TRK042345678", address: "618 Mulberry Rd, Miami, FL", name: "Penny Turner", created: "2025-09-21", delivery: "2025-11-27", status: "delivered"},
-            {tracking: "TRK043456789", address: "729 Olive Dr, Oakland, CA", name: "Quincy Phillips", created: "2025-09-22", delivery: "2025-11-22", status: "pending"},
-            {tracking: "TRK044567890", address: "840 Persimmon Ln, Minneapolis, MN", name: "Ruby Campbell", created: "2025-09-23", delivery: "2025-11-28", status: "delivered"},
-            {tracking: "TRK045678901", address: "951 Quince Blvd, Tulsa, OK", name: "Steve Parker", created: "2025-09-24", delivery: "2025-11-23", status: "pending"},
-            {tracking: "TRK046789012", address: "162 Rowan Ct, Cleveland, OH", name: "Tracy Evans", created: "2025-09-25", delivery: "2025-11-29", status: "delivered"},
-            {tracking: "TRK047890123", address: "273 Sequoia St, Wichita, KS", name: "Uma Edwards", created: "2025-09-26", delivery: "2025-11-24", status: "pending"},
-            {tracking: "TRK048901234", address: "384 Tamarack Ave, Arlington, TX", name: "Victor Collins", created: "2025-09-27", delivery: "2025-11-30", status: "fail"},
-            {tracking: "TRK049012345", address: "495 Viburnum Rd, New Orleans, LA", name: "Wendy Stewart", created: "2025-09-28", delivery: "2025-11-25", status: "pending"},
-            {tracking: "TRK050123456", address: "606 Yew Dr, Bakersfield, CA", name: "Xander Sanchez", created: "2025-09-29", delivery: "2025-12-01", status: "delivered"}
-        ];
+        document.addEventListener('DOMContentLoaded', () => {
+            // AI Pill Wave Animation
+            const waveDuration = 1200;
+            const emissionInterval = 500;
 
-        let currentOrders = [...orders];
+            document.querySelectorAll('.ai-pill').forEach(pill => {
+                const spawnWave = () => {
+                    const wave = document.createElement('span');
+                    wave.className = 'ai-wave';
+                    wave.style.setProperty('--ai-wave-duration', `${waveDuration}ms`);
+                    pill.appendChild(wave);
+                    wave.addEventListener('animationend', () => wave.remove());
+                };
 
-        function renderTable(data) {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = data.map(order => `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${order.tracking}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.address}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.created}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.delivery}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'delivered' ? 'bg-green-100 text-green-800' : order.status === 'fail' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
-                            ${order.status}
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
-        }
+                const scheduleEmission = () => {
+                    spawnWave();
+                    setTimeout(scheduleEmission, emissionInterval);
+                };
 
-        function applyFilters() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const sortBy = document.getElementById('sortBy').value;
+                scheduleEmission();
+            });
 
-            // Filter by status (fail is not functional yet)
-            let filteredOrders = statusFilter === 'all' || statusFilter === 'fail'
-                ? [...orders] 
-                : orders.filter(order => order.status === statusFilter);
+            // ===== CHAT SIMULATOR MODULE =====
+            class ChatSimulator {
+                constructor(inputId, sendBtnId, resultsId, autocompleteId) {
+                    this.queryInput = document.getElementById(inputId);
+                    this.sendBtn = document.getElementById(sendBtnId);
+                    this.resultsContainer = document.getElementById(resultsId);
+                    this.autocomplete = document.getElementById(autocompleteId);
+                    this.currentFilter = null;
 
-            // Sort by date (newest first)
-            if (sortBy === 'delivery' || sortBy === 'created') {
-                filteredOrders.sort((a, b) => {
-                    return new Date(b[sortBy]) - new Date(a[sortBy]);
-                });
+                    this.allOrders = [
+                        { tracking: 'WM-2024-001234', date: 'Ayer 10:23 AM', client: 'Walmart', po: 'C25110303527142', status: 'Delivered' },
+                        { tracking: '360L-2024-5678', date: 'Ayer 10:45 AM', client: '360 Lion', po: 'C25110303527143', status: 'Delivered' },
+                        { tracking: 'WM-2024-001236', date: 'Ayer 11:32 AM', client: 'Walmart', po: 'C25110303527144', status: 'Delivered' },
+                        { tracking: '360L-2024-5679', date: 'Ayer 12:15 PM', client: '360 Lion', po: 'C25110303527145', status: 'Delivered' },
+                        { tracking: 'WM-2024-001238', date: 'Ayer 01:58 PM', client: 'Walmart', po: 'C25110303527146', status: 'Delivered' },
+                        { tracking: 'WM-2024-001239', date: 'Ayer 09:15 AM', client: 'Walmart', po: 'C25110303527147', status: 'Delivered' },
+                        { tracking: '360L-2024-5680', date: 'Ayer 10:30 AM', client: '360 Lion', po: 'C25110303527148', status: 'Delivered' },
+                        { tracking: 'WM-2024-001240', date: 'Ayer 11:05 AM', client: 'Walmart', po: 'C25110303527149', status: 'Delivered' },
+                        { tracking: '360L-2024-5681', date: 'Ayer 01:20 PM', client: '360 Lion', po: 'C25110303527150', status: 'Delivered' },
+                        { tracking: 'WM-2024-001241', date: 'Ayer 01:45 PM', client: 'Walmart', po: 'C25110303527151', status: 'Delivered' }
+                    ];
+
+                    this.init();
+                }
+
+                init() {
+                    if (!this.sendBtn || !this.resultsContainer) return;
+
+                    // Send button click handler
+                    this.sendBtn.addEventListener('click', () => this.executeQuery());
+
+                    // Input click handler - show autocomplete
+                    if (this.queryInput) {
+                        this.queryInput.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.showAutocomplete();
+                        });
+                    }
+
+                    // Close autocomplete when clicking outside
+                    document.addEventListener('click', () => this.hideAutocomplete());
+                }
+
+                showAutocomplete() {
+                    if (!this.autocomplete) return;
+
+                    // Update autocomplete content based on current filter
+                    let optionText = '';
+                    if (this.currentFilter) {
+                        optionText = 'Mostrar todas las órdenes';
+                    } else {
+                        optionText = 'Solo quiero las de walmart';
+                    }
+
+                    this.autocomplete.innerHTML = `
+                        <div class="autocomplete-option px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded cursor-pointer transition-colors">
+                            ${optionText}
+                        </div>
+                    `;
+
+                    // Add click handler to the new option
+                    const option = this.autocomplete.querySelector('.autocomplete-option');
+                    if (option) {
+                        option.addEventListener('click', () => this.handleAutocompleteClick());
+                    }
+
+                    this.autocomplete.classList.remove('hidden');
+                }
+
+                handleAutocompleteClick() {
+                    if (this.currentFilter) {
+                        // Reset filter to show all orders
+                        this.currentFilter = null;
+                        this.queryInput.textContent = 'Dame órdenes entregadas de ayer antes de las 2 pm';
+                    } else {
+                        // Apply Walmart filter
+                        this.currentFilter = 'Walmart';
+                        this.queryInput.textContent = 'Solo quiero las de walmart';
+                    }
+                    this.hideAutocomplete();
+                    this.executeQuery();
+                }
+
+                hideAutocomplete() {
+                    if (this.autocomplete) {
+                        this.autocomplete.classList.add('hidden');
+                    }
+                }
+
+                async executeQuery() {
+                    // Clear previous results
+                    this.resultsContainer.innerHTML = '';
+                    this.resultsContainer.classList.remove('hidden');
+                    this.hideAutocomplete();
+
+                    // Show loading
+                    await this.showLoading();
+
+                    // Get filtered orders
+                    const orders = this.getFilteredOrders();
+
+                    // Display results with streaming effect
+                    await this.streamResults(orders);
+                }
+
+                async showLoading() {
+                    const messages = [
+                        'Estamos buscando tus órdenes...',
+                        'Organizando...',
+                        'Está casi listo...'
+                    ];
+
+                    // Create persistent message container
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'bg-white rounded-xl px-6 py-6 flex items-center text-gray-700 text-base font-normal shadow-sm border border-gray-200';
+                    messageDiv.innerHTML = `<div class="loading-spinner purple"></div><span id="loading-message-text">${messages[0]}</span>`;
+                    this.resultsContainer.innerHTML = '';
+                    this.resultsContainer.appendChild(messageDiv);
+
+                    const textSpan = messageDiv.querySelector('#loading-message-text');
+
+                    // Change messages without fade
+                    for (let i = 1; i < messages.length; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        textSpan.textContent = messages[i];
+                    }
+
+                    // Wait before clearing
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    this.resultsContainer.innerHTML = '';
+                }
+
+                getFilteredOrders() {
+                    if (this.currentFilter) {
+                        return this.allOrders.filter(order => order.client === this.currentFilter);
+                    }
+                    return this.allOrders;
+                }
+
+                async streamResults(orders) {
+                    const resultsDiv = document.createElement('div');
+                    resultsDiv.className = 'bg-white rounded-lg border border-gray-200 overflow-hidden';
+                    this.resultsContainer.appendChild(resultsDiv);
+
+                    // Create header row
+                    const headerRow = document.createElement('div');
+                    headerRow.className = 'grid gap-4 bg-gray-100 px-4 py-2 border-b border-gray-200';
+                    headerRow.style.gridTemplateColumns = '1.2fr 1fr 0.8fr 1.3fr 1fr';
+                    headerRow.innerHTML = `
+                        <div class="font-semibold text-gray-700 text-sm">Tracking Number</div>
+                        <div class="font-semibold text-gray-700 text-sm">Created At</div>
+                        <div class="font-semibold text-gray-700 text-sm">Client</div>
+                        <div class="font-semibold text-gray-700 text-sm">Orden de Compra</div>
+                        <div class="font-semibold text-gray-700 text-sm">Status</div>
+                    `;
+                    resultsDiv.appendChild(headerRow);
+
+                    // Stream data rows
+                    for (let i = 0; i < orders.length; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 300));
+
+                        const order = orders[i];
+                        const dataRow = document.createElement('div');
+                        dataRow.className = 'grid gap-4 px-4 py-2 border-b border-gray-100 opacity-0 transition-opacity duration-500 hover:bg-gray-50 cursor-pointer transition-colors';
+                        dataRow.style.gridTemplateColumns = '1.2fr 1fr 0.8fr 1.3fr 1fr';
+                        dataRow.innerHTML = `
+                            <div class="text-gray-700 text-base font-bold">
+                                ${order.tracking}
+                            </div>
+                            <div class="text-gray-700 text-base">${order.date}</div>
+                            <div class="text-gray-700 text-base">${order.client}</div>
+                            <div>
+                                <span class="inline-block bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full font-medium">${order.po}</span>
+                            </div>
+                            <div>
+                                <span class="inline-flex items-center gap-1 bg-[#05b86b] text-white text-xs px-3 py-1 rounded-full font-medium">
+                                    <i class="fas fa-check text-xs"></i>
+                                    ${order.status}
+                                </span>
+                            </div>
+                        `;
+                        resultsDiv.appendChild(dataRow);
+
+                        // Fade in the row
+                        setTimeout(() => {
+                            dataRow.style.opacity = '1';
+                        }, 50);
+                    }
+
+                    // Add export link after all rows
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    const exportRow = document.createElement('div');
+                    exportRow.className = 'px-4 py-4 text-right opacity-0 transition-opacity duration-500';
+                    exportRow.innerHTML = `
+                        <a href="#" class="text-[#05b86b] hover:text-[#049a5d] font-medium text-base">
+                            <i class="fas fa-download mr-2"></i>Exportar órdenes
+                        </a>
+                    `;
+                    resultsDiv.appendChild(exportRow);
+
+                    // Fade in export link
+                    setTimeout(() => {
+                        exportRow.style.opacity = '1';
+                    }, 50);
+                }
             }
 
-            currentOrders = filteredOrders;
-            renderTable(currentOrders);
-        }
+            // Initialize Natural Language Query Simulation
+            new ChatSimulator('query-input', 'send-query-btn', 'query-results', 'autocomplete-suggestions');
 
-        document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        document.getElementById('sortBy').addEventListener('change', applyFilters);
+            // ===== CHATBOT ASSISTANT SIMULATOR =====
+            class ChatbotAssistant {
+                constructor(inputId, sendBtnId, resultsId) {
+                    this.chatbotInput = document.getElementById(inputId);
+                    this.sendBtn = document.getElementById(sendBtnId);
+                    this.resultsContainer = document.getElementById(resultsId);
 
-        // Initial render
-        renderTable(currentOrders);
+                    this.init();
+                }
+
+                init() {
+                    if (!this.sendBtn || !this.resultsContainer) return;
+
+                    this.sendBtn.addEventListener('click', () => this.showPermissionResponse());
+                }
+
+                async showPermissionResponse() {
+                    // Clear previous results
+                    this.resultsContainer.innerHTML = '';
+                    this.resultsContainer.classList.remove('hidden');
+
+                    // Show loading
+                    this.resultsContainer.innerHTML = '<div class="bg-white rounded-xl px-6 py-6 flex items-center text-gray-700 text-base font-normal shadow-sm border border-gray-200"><div class="loading-spinner purple"></div><span>Analizando tus permisos...</span></div>';
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    // Clear loading
+                    this.resultsContainer.innerHTML = '';
+
+                    // Create response container
+                    const responseDiv = document.createElement('div');
+                    responseDiv.className = 'bg-gray-50 rounded-lg p-6 space-y-4';
+
+                    responseDiv.innerHTML = `
+                        <!-- User Icon and Info -->
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[#602166] flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-white text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900 mb-3">Información de Usuario</h4>
+                                <div class="bg-white rounded-lg p-4 border border-gray-200 space-y-3">
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <span class="font-medium text-gray-400 text-xs block mb-1">Nombre</span>
+                                            <span class="text-gray-700 text-base">Juan Pérez</span>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-gray-400 text-xs block mb-1">Correo</span>
+                                            <span class="text-gray-700 text-base">juan.perez@empresa.com</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium text-gray-400 text-xs block mb-2">Permisos</span>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-300 text-gray-700 text-sm">
+                                                <i class="fas fa-check text-green-500 text-xs"></i>
+                                                Leer órdenes
+                                            </span>
+                                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-300 text-gray-700 text-sm">
+                                                <i class="fas fa-check text-green-500 text-xs"></i>
+                                                Leer rutas
+                                            </span>
+                                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-300 text-gray-400 text-sm">
+                                                <i class="fas fa-times text-red-500 text-xs"></i>
+                                                Eliminar órdenes
+                                            </span>
+                                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-300 text-gray-400 text-sm">
+                                                <i class="fas fa-times text-red-500 text-xs"></i>
+                                                Editar órdenes
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Warning Message -->
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 mt-1"></i>
+                                <div>
+                                    <p class="text-sm text-yellow-800">
+                                        Tu usuario no cuenta con permisos para poder eliminar órdenes, contacta a tu supervisor para habilitarlos.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    this.resultsContainer.appendChild(responseDiv);
+
+                    // Fade in animation
+                    setTimeout(() => {
+                        responseDiv.style.opacity = '0';
+                        responseDiv.style.transition = 'opacity 0.5s';
+                        setTimeout(() => {
+                            responseDiv.style.opacity = '1';
+                        }, 50);
+                    }, 10);
+                }
+            }
+
+            // Initialize Chatbot Assistant
+            new ChatbotAssistant('chatbot-input', 'send-chatbot-btn', 'chatbot-results');
+
+            // ===== DOCUMENTATION ASSISTANT SIMULATOR =====
+            class DocumentationAssistant {
+                constructor(inputId, sendBtnId, resultsId) {
+                    this.docsInput = document.getElementById(inputId);
+                    this.sendBtn = document.getElementById(sendBtnId);
+                    this.resultsContainer = document.getElementById(resultsId);
+
+                    this.documentationText = `**Paso 1:** Haz clic en la parte superior en "Rastrear".
+
+**Paso 2:** Ingresa el número de orden o código de rastreo en el campo de búsqueda.
+
+**Paso 3:** Selecciona el rango de fechas si necesitas filtrar por período específico.
+
+**Paso 4:** Haz clic en el botón "Buscar" y el sistema mostrará el estado actual de tu orden con todos los detalles de seguimiento.`;
+
+                    this.init();
+                }
+
+                init() {
+                    if (!this.sendBtn || !this.resultsContainer) return;
+
+                    this.sendBtn.addEventListener('click', () => this.showDocumentation());
+                }
+
+                async showDocumentation() {
+                    // Clear previous results
+                    this.resultsContainer.innerHTML = '';
+                    this.resultsContainer.classList.remove('hidden');
+
+                    // Show loading
+                    this.resultsContainer.innerHTML = '<div class="bg-white rounded-xl px-6 py-6 flex items-center text-gray-700 text-base font-normal shadow-sm border border-gray-200"><div class="loading-spinner purple"></div><span>Generando documentación...</span></div>';
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+
+                    // Clear loading
+                    this.resultsContainer.innerHTML = '';
+
+                    // Create response container
+                    const responseDiv = document.createElement('div');
+                    responseDiv.className = 'bg-gray-50 rounded-lg p-6';
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'text-gray-700 text-base leading-relaxed';
+                    contentDiv.style.whiteSpace = 'pre-line';
+
+                    responseDiv.appendChild(contentDiv);
+                    this.resultsContainer.appendChild(responseDiv);
+
+                    // Type out the text
+                    await this.typeText(contentDiv, this.documentationText);
+                }
+
+                async typeText(element, text) {
+                    const words = text.split(' ');
+                    let currentText = '';
+
+                    for (let i = 0; i < words.length; i++) {
+                        currentText += (i > 0 ? ' ' : '') + words[i];
+
+                        // Format markdown bold
+                        const formattedText = currentText.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+                        element.innerHTML = formattedText;
+
+                        // Variable delay for more natural typing
+                        const delay = words[i].length > 8 ? 80 : 50;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            }
+
+            // Initialize Documentation Assistant
+            new DocumentationAssistant('docs-input', 'send-docs-btn', 'docs-results');
+        });
     </script>
+
+    <!-- AnyChart Script -->
+    <script>
+        anychart.onDocumentReady(function () {
+            // Create data
+            var data = [
+                {
+                    id: "header1",
+                    name: "NEW MODULES",
+                    owner: "",
+                    etapa: "",
+                    isHeader: true,
+                    actualStart: Date.UTC(2024, 10, 1),
+                    actualEnd: Date.UTC(2025, 0, 30),
+                    progressValue: "0%"
+                },
+                {
+                    id: "1",
+                    name: "Routing, Sorting",
+                    owner: "vic",
+                    etapa: "E1",
+                    parent: "header1",
+                    actualStart: Date.UTC(2024, 10, 1),
+                    actualEnd: Date.UTC(2024, 10, 21),
+                    progressValue: "70%"
+                },
+                {
+                    id: "2",
+                    name: "Tracking",
+                    owner: "chr",
+                    etapa: "E1",
+                    parent: "header1",
+                    actualStart: Date.UTC(2024, 10, 22),
+                    actualEnd: Date.UTC(2024, 11, 8),
+                    progressValue: "40%"
+                },
+                {
+                    id: "3",
+                    name: "Tracking Live",
+                    owner: "vic",
+                    etapa: "E1",
+                    parent: "header1",
+                    actualStart: Date.UTC(2024, 11, 9),
+                    actualEnd: Date.UTC(2024, 11, 30),
+                    progressValue: "20%"
+                },
+                {
+                    id: "7",
+                    name: "Recolecciones",
+                    owner: "vic",
+                    etapa: "E1",
+                    parent: "header1",
+                    actualStart: Date.UTC(2025, 0, 1),
+                    actualEnd: Date.UTC(2025, 0, 30),
+                    progressValue: "0%"
+                },
+                {
+                    id: "header2",
+                    name: "GENERAL BRANDING",
+                    owner: "",
+                    etapa: "",
+                    isHeader: true,
+                    actualStart: Date.UTC(2024, 11, 1),
+                    actualEnd: Date.UTC(2025, 2, 31),
+                    progressValue: "0%"
+                },
+                {
+                    id: "4",
+                    name: "Layout general",
+                    owner: "chr",
+                    etapa: "E1",
+                    parent: "header2",
+                    actualStart: Date.UTC(2024, 11, 1),
+                    actualEnd: Date.UTC(2024, 11, 30),
+                    progressValue: "0%"
+                },
+                {
+                    id: "8",
+                    name: "Responsive",
+                    owner: "chr,vic",
+                    etapa: "E1",
+                    parent: "header2",
+                    actualStart: Date.UTC(2024, 11, 1),
+                    actualEnd: Date.UTC(2025, 2, 30),
+                    progressValue: "0%"
+                },
+                {
+                    id: "5",
+                    name: "Main components",
+                    owner: "chr,vic",
+                    etapa: "E1",
+                    parent: "header2",
+                    actualStart: Date.UTC(2025, 0, 1),
+                    actualEnd: Date.UTC(2025, 0, 30),
+                    progressValue: "0%"
+                },
+                {
+                    id: "6",
+                    name: "All modules (+22)",
+                    owner: "chr,vic",
+                    etapa: "E1",
+                    parent: "header2",
+                    actualStart: Date.UTC(2024, 10, 1),
+                    actualEnd: Date.UTC(2025, 2, 31),
+                    progressValue: "15%"
+                },
+                {
+                    id: "header3",
+                    name: "UPGRADE",
+                    owner: "",
+                    etapa: "",
+                    isHeader: true,
+                    actualStart: Date.UTC(2025, 3, 1),
+                    actualEnd: Date.UTC(2025, 3, 30),
+                    progressValue: "0%"
+                },
+                {
+                    id: "9",
+                    name: "React 18",
+                    owner: "chr,vic",
+                    etapa: "E2",
+                    parent: "header3",
+                    actualStart: Date.UTC(2025, 3, 1),
+                    actualEnd: Date.UTC(2025, 3, 30),
+                    progressValue: "0%"
+                },
+                {
+                    id: "header4",
+                    name: "DESIGN SYSTEM",
+                    owner: "",
+                    etapa: "",
+                    isHeader: true,
+                    actualStart: Date.UTC(2025, 4, 1),
+                    actualEnd: Date.UTC(2025, 5, 15),
+                    progressValue: "0%"
+                },
+                {
+                    id: "10",
+                    name: "Component Library",
+                    owner: "chr,vic",
+                    etapa: "E3",
+                    parent: "header4",
+                    actualStart: Date.UTC(2025, 4, 1),
+                    actualEnd: Date.UTC(2025, 5, 15),
+                    progressValue: "0%"
+                },
+                {
+                    id: "header5",
+                    name: "IA PURPOSES",
+                    owner: "",
+                    etapa: "",
+                    isHeader: true,
+                    actualStart: Date.UTC(2025, 5, 15),
+                    actualEnd: Date.UTC(2025, 5, 30),
+                    progressValue: "0%"
+                },
+                {
+                    id: "11",
+                    name: "AI Integration",
+                    owner: "chr,vic",
+                    etapa: "E4",
+                    parent: "header5",
+                    actualStart: Date.UTC(2025, 5, 15),
+                    actualEnd: Date.UTC(2025, 5, 30),
+                    progressValue: "0%"
+                }
+            ];
+
+            // Create gantt chart
+            var chart = anychart.ganttProject();
+
+            // Set data
+            var dataTable = anychart.data.tree(data, "as-table");
+            chart.data(dataTable);
+
+            // Configure row height for thicker bars
+            chart.defaultRowHeight(35);
+
+            // Increase height for parent/header rows
+            chart.rowHoverFill("none");
+            chart.rowSelectedFill("none");
+
+            // Configure timeline header with multiple levels
+            var header = chart.getTimeline().header();
+
+            // Level 0: Show weeks (bottom level)
+            header.level(0);
+            header.level(0).height(30);
+
+            // Level 1: Show months and year (top level)
+            header.level(1).format("{%tickValue}{dateTimeFormat:MMM yyyy}");
+            header.level(1).height(50);
+
+            // Style configuration
+            chart.getTimeline().scale().minimum(Date.UTC(2024, 10, 1));
+            chart.getTimeline().scale().maximum(Date.UTC(2025, 6, 30));
+
+            // Color scheme
+            chart.getTimeline().tasks().normal().fill("#602166 0.4");
+            chart.getTimeline().tasks().selected().fill("#602166 0.6");
+            chart.getTimeline().tasks().normal().stroke("#602166");
+
+            chart.getTimeline().baselines().normal().fill("#e5e7eb");
+            chart.getTimeline().baselines().normal().stroke("#d1d5db");
+
+            // Progress styling
+            chart.getTimeline().tasks().progress().fill("#602166");
+            chart.getTimeline().tasks().progress().stroke("#602166");
+
+            // Grouping tasks styling (parent tasks) - make bars taller
+            chart.getTimeline().groupingTasks().normal().fill("#05b86b");
+            chart.getTimeline().groupingTasks().selected().fill("#05b86b");
+            chart.getTimeline().groupingTasks().normal().stroke("#05b86b", 2);
+            chart.getTimeline().groupingTasks().height("80%");
+
+            // Labels for grouping tasks - positioned inside the bars
+            var groupingLabels = chart.getTimeline().groupingTasks().labels();
+            groupingLabels.enabled(true);
+            groupingLabels.format("{%name}");
+            groupingLabels.fontColor("#ffffff");
+            groupingLabels.fontSize(11);
+            groupingLabels.fontWeight(700);
+            groupingLabels.padding([0, 10, 0, 10]);
+            groupingLabels.position("left-center");
+            groupingLabels.anchor("left-center");
+            groupingLabels.offsetX(10);
+
+            // Grid styling
+            chart.dataGrid().backgroundFill("#fafafa");
+
+            // Add etapa column (column 0)
+            var etapaColumn = chart.dataGrid().column(0);
+            etapaColumn.width(60);
+            etapaColumn.title().text("Etapa");
+            etapaColumn.title().fontColor("#666");
+            etapaColumn.title().fontSize(11);
+            etapaColumn.labels().format(function() {
+                var etapaData = this.getData('etapa');
+                if (!etapaData || etapaData === '') {
+                    return '';
+                }
+                return '<span style="background-color: #4a4a4a; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500;">' + etapaData + '</span>';
+            });
+            etapaColumn.labels().useHtml(true);
+
+            // Add owner column (column 1)
+            var ownerColumn = chart.dataGrid().column(1);
+            ownerColumn.width(120);
+            ownerColumn.title().text("Asignado");
+            ownerColumn.title().fontColor("#666");
+            ownerColumn.title().fontSize(11);
+            ownerColumn.labels().format(function() {
+                var ownerData = this.getData('owner');
+                if (!ownerData || ownerData === '') {
+                    return '';
+                }
+                var owners = ownerData.split(',');
+                var html = '';
+                owners.forEach(function(owner) {
+                    var bgColor = owner === 'chr' ? '#05b86b' : '#602166';
+                    html += '<span style="background-color: ' + bgColor + '; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; margin-right: 4px;">' + owner + '</span>';
+                });
+                return html;
+            });
+            ownerColumn.labels().useHtml(true);
+
+            // Configure name column (column 2)
+            var nameColumn = chart.dataGrid().column(2);
+            nameColumn.width(250);
+            nameColumn.title().text("Tarea");
+            nameColumn.title().fontColor("#666");
+            nameColumn.title().fontSize(11);
+            nameColumn.labels().format("{%name}");
+
+            // Set container and draw
+            chart.container("gantt-chart");
+            chart.draw();
+
+            // Enable horizontal scrolling with compact view
+            chart.splitterPosition("30%");
+
+            // Initial zoom to show main timeline
+            chart.zoomTo(Date.UTC(2024, 10, 1), Date.UTC(2025, 6, 15));
+        });
+    </script>
+
 </body>
 </html>
