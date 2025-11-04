@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders for Delivery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    JD
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900">John Doe</p>
+                    <p class="text-xs text-gray-500">john.doe@email.com</p>
+                </div>
+            </div>
+            <div class="cursor-pointer">
+                <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">Orders for Delivery</h1>
+        
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap gap-4">
+            <div class="flex-1 min-w-[200px]">
+                <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Status:</label>
+                <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="all">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="fail">Fail</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-2">Sort by:</label>
+                <select id="sortBy" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Select...</option>
+                    <option value="delivery">Delivery Date (Newest First)</option>
+                    <option value="created">Created Date (Newest First)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking Number</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivery Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Data will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Generate 50 dummy records
+        const orders = [
+            {tracking: "TRK001234567", address: "123 Main St, New York, NY", name: "Alice Johnson", created: "2025-10-01", delivery: "2025-11-05", status: "fail"},
+            {tracking: "TRK002345678", address: "456 Oak Ave, Los Angeles, CA", name: "Bob Smith", created: "2025-10-02", delivery: "2025-11-06", status: "delivered"},
+            {tracking: "TRK003456789", address: "789 Pine Rd, Chicago, IL", name: "Carol Williams", created: "2025-10-03", delivery: "2025-11-04", status: "pending"},
+            {tracking: "TRK004567890", address: "321 Elm St, Houston, TX", name: "David Brown", created: "2025-10-04", delivery: "2025-11-07", status: "fail"},
+            {tracking: "TRK005678901", address: "654 Maple Dr, Phoenix, AZ", name: "Emma Davis", created: "2025-10-05", delivery: "2025-11-08", status: "pending"},
+            {tracking: "TRK006789012", address: "987 Cedar Ln, Philadelphia, PA", name: "Frank Miller", created: "2025-10-06", delivery: "2025-11-03", status: "delivered"},
+            {tracking: "TRK007890123", address: "147 Birch Ct, San Antonio, TX", name: "Grace Wilson", created: "2025-10-07", delivery: "2025-11-09", status: "fail"},
+            {tracking: "TRK008901234", address: "258 Walnut Blvd, San Diego, CA", name: "Henry Moore", created: "2025-10-08", delivery: "2025-11-10", status: "delivered"},
+            {tracking: "TRK009012345", address: "369 Cherry St, Dallas, TX", name: "Iris Taylor", created: "2025-10-09", delivery: "2025-11-05", status: "pending"},
+            {tracking: "TRK010123456", address: "741 Spruce Ave, San Jose, CA", name: "Jack Anderson", created: "2025-10-10", delivery: "2025-11-11", status: "delivered"},
+            {tracking: "TRK011234567", address: "852 Ash Rd, Austin, TX", name: "Karen Thomas", created: "2025-10-11", delivery: "2025-11-06", status: "pending"},
+            {tracking: "TRK012345678", address: "963 Poplar Dr, Jacksonville, FL", name: "Leo Jackson", created: "2025-10-12", delivery: "2025-11-12", status: "delivered"},
+            {tracking: "TRK013456789", address: "159 Hickory Ln, Fort Worth, TX", name: "Maria White", created: "2025-10-13", delivery: "2025-11-07", status: "pending"},
+            {tracking: "TRK014567890", address: "357 Willow St, Columbus, OH", name: "Nathan Harris", created: "2025-10-14", delivery: "2025-11-13", status: "delivered"},
+            {tracking: "TRK015678901", address: "486 Sycamore Ave, San Francisco, CA", name: "Olivia Martin", created: "2025-10-15", delivery: "2025-11-08", status: "pending"},
+            {tracking: "TRK016789012", address: "792 Magnolia Blvd, Charlotte, NC", name: "Peter Thompson", created: "2025-10-16", delivery: "2025-11-14", status: "delivered"},
+            {tracking: "TRK017890123", address: "135 Cypress Ct, Indianapolis, IN", name: "Quinn Garcia", created: "2025-10-17", delivery: "2025-11-09", status: "pending"},
+            {tracking: "TRK018901234", address: "246 Redwood Dr, Seattle, WA", name: "Rachel Martinez", created: "2025-10-18", delivery: "2025-11-15", status: "delivered"},
+            {tracking: "TRK019012345", address: "531 Fir Rd, Denver, CO", name: "Samuel Robinson", created: "2025-10-19", delivery: "2025-11-10", status: "pending"},
+            {tracking: "TRK020123456", address: "864 Palm St, Washington, DC", name: "Tina Clark", created: "2025-10-20", delivery: "2025-11-16", status: "fail"},
+            {tracking: "TRK021234567", address: "975 Beech Ave, Boston, MA", name: "Ulysses Rodriguez", created: "2025-10-21", delivery: "2025-11-11", status: "pending"},
+            {tracking: "TRK022345678", address: "108 Alder Ln, El Paso, TX", name: "Victoria Lewis", created: "2025-10-22", delivery: "2025-11-17", status: "fail"},
+            {tracking: "TRK023456789", address: "219 Hazel Dr, Nashville, TN", name: "William Lee", created: "2025-10-23", delivery: "2025-11-12", status: "pending"},
+            {tracking: "TRK024567890", address: "420 Juniper Blvd, Detroit, MI", name: "Xena Walker", created: "2025-10-24", delivery: "2025-11-18", status: "delivered"},
+            {tracking: "TRK025678901", address: "531 Dogwood Ct, Oklahoma City, OK", name: "Yuri Hall", created: "2025-10-25", delivery: "2025-11-13", status: "fail"},
+            {tracking: "TRK026789012", address: "642 Laurel St, Portland, OR", name: "Zoe Allen", created: "2025-10-26", delivery: "2025-11-19", status: "delivered"},
+            {tracking: "TRK027890123", address: "753 Chestnut Ave, Las Vegas, NV", name: "Aaron Young", created: "2025-10-27", delivery: "2025-11-14", status: "pending"},
+            {tracking: "TRK028901234", address: "864 Pecan Rd, Louisville, KY", name: "Bella Hernandez", created: "2025-10-28", delivery: "2025-11-20", status: "delivered"},
+            {tracking: "TRK029012345", address: "975 Acacia Dr, Baltimore, MD", name: "Charlie King", created: "2025-10-29", delivery: "2025-11-15", status: "pending"},
+            {tracking: "TRK030123456", address: "186 Cottonwood Ln, Milwaukee, WI", name: "Diana Wright", created: "2025-10-30", delivery: "2025-11-21", status: "delivered"},
+            {tracking: "TRK031234567", address: "297 Mesquite Blvd, Albuquerque, NM", name: "Ethan Lopez", created: "2025-10-31", delivery: "2025-11-16", status: "pending"},
+            {tracking: "TRK032345678", address: "408 Sassafras Ct, Tucson, AZ", name: "Fiona Hill", created: "2025-11-01", delivery: "2025-11-22", status: "delivered"},
+            {tracking: "TRK033456789", address: "519 Buckeye St, Fresno, CA", name: "George Scott", created: "2025-11-02", delivery: "2025-11-17", status: "pending"},
+            {tracking: "TRK034567890", address: "630 Buttonwood Ave, Sacramento, CA", name: "Hannah Green", created: "2025-11-03", delivery: "2025-11-23", status: "delivered"},
+            {tracking: "TRK035678901", address: "741 Catalpa Rd, Long Beach, CA", name: "Isaac Adams", created: "2025-11-04", delivery: "2025-11-18", status: "pending"},
+            {tracking: "TRK036789012", address: "852 Elderberry Dr, Kansas City, MO", name: "Julia Baker", created: "2025-09-15", delivery: "2025-11-24", status: "delivered"},
+            {tracking: "TRK037890123", address: "963 Ginkgo Ln, Mesa, AZ", name: "Kevin Nelson", created: "2025-09-16", delivery: "2025-11-19", status: "pending"},
+            {tracking: "TRK038901234", address: "174 Hawthorne Blvd, Atlanta, GA", name: "Laura Carter", created: "2025-09-17", delivery: "2025-11-25", status: "fail"},
+            {tracking: "TRK039012345", address: "285 Ironwood Ct, Colorado Springs, CO", name: "Marcus Mitchell", created: "2025-09-18", delivery: "2025-11-20", status: "pending"},
+            {tracking: "TRK040123456", address: "396 Katsura St, Raleigh, NC", name: "Nina Perez", created: "2025-09-19", delivery: "2025-11-26", status: "fail"},
+            {tracking: "TRK041234567", address: "507 Linden Ave, Omaha, NE", name: "Oscar Roberts", created: "2025-09-20", delivery: "2025-11-21", status: "pending"},
+            {tracking: "TRK042345678", address: "618 Mulberry Rd, Miami, FL", name: "Penny Turner", created: "2025-09-21", delivery: "2025-11-27", status: "delivered"},
+            {tracking: "TRK043456789", address: "729 Olive Dr, Oakland, CA", name: "Quincy Phillips", created: "2025-09-22", delivery: "2025-11-22", status: "pending"},
+            {tracking: "TRK044567890", address: "840 Persimmon Ln, Minneapolis, MN", name: "Ruby Campbell", created: "2025-09-23", delivery: "2025-11-28", status: "delivered"},
+            {tracking: "TRK045678901", address: "951 Quince Blvd, Tulsa, OK", name: "Steve Parker", created: "2025-09-24", delivery: "2025-11-23", status: "pending"},
+            {tracking: "TRK046789012", address: "162 Rowan Ct, Cleveland, OH", name: "Tracy Evans", created: "2025-09-25", delivery: "2025-11-29", status: "delivered"},
+            {tracking: "TRK047890123", address: "273 Sequoia St, Wichita, KS", name: "Uma Edwards", created: "2025-09-26", delivery: "2025-11-24", status: "pending"},
+            {tracking: "TRK048901234", address: "384 Tamarack Ave, Arlington, TX", name: "Victor Collins", created: "2025-09-27", delivery: "2025-11-30", status: "fail"},
+            {tracking: "TRK049012345", address: "495 Viburnum Rd, New Orleans, LA", name: "Wendy Stewart", created: "2025-09-28", delivery: "2025-11-25", status: "pending"},
+            {tracking: "TRK050123456", address: "606 Yew Dr, Bakersfield, CA", name: "Xander Sanchez", created: "2025-09-29", delivery: "2025-12-01", status: "delivered"}
+        ];
+
+        let currentOrders = [...orders];
+
+        function renderTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = data.map(order => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${order.tracking}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.address}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.created}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.delivery}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'delivered' ? 'bg-green-100 text-green-800' : order.status === 'fail' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${order.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            // Filter by status (fail is not functional yet)
+            let filteredOrders = statusFilter === 'all' || statusFilter === 'fail'
+                ? [...orders] 
+                : orders.filter(order => order.status === statusFilter);
+
+            // Sort by date (newest first)
+            if (sortBy === 'delivery' || sortBy === 'created') {
+                filteredOrders.sort((a, b) => {
+                    return new Date(b[sortBy]) - new Date(a[sortBy]);
+                });
+            }
+
+            currentOrders = filteredOrders;
+            renderTable(currentOrders);
+        }
+
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('sortBy').addEventListener('change', applyFilters);
+
+        // Initial render
+        renderTable(currentOrders);
+    </script>
+</body>
+</html>
